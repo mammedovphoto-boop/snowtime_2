@@ -1,0 +1,186 @@
+---
+// Мастер подбора отдыха. Честный сценарий: заявка уходит менеджеру в WhatsApp,
+// наличие и цену подтверждает человек. Сервер и CRM подключаются позже (docs/STATUS.md).
+import site from '../data/site.json';
+const kinds = ['Номер в отеле Ereto', 'Коттедж или шале целиком', 'Тур на 3 ночи', 'Поездка под ключ'];
+const extras = ['Трансфер из аэропорта', 'Прокат снаряжения', 'Инструктор', 'Private SPA'];
+---
+<section class="section planner dark" id="plan">
+  <div class="wrap planner-grid">
+    <header>
+      <p class="kicker" data-rise>Подбор отдыха</p>
+      <h2 class="display h-lg" data-split>
+        <span class="split-line"><span>Расскажите,</span></span>
+        <span class="split-line"><span>как хотите <em>отдохнуть</em></span></span>
+      </h2>
+      <p class="lead muted" data-rise>Три шага, одна минута. Менеджер проверит свободные даты и пришлёт точную цену.</p>
+      <p class="planner-phone" data-rise>Или сразу напишите: <a href={`tel:+${site.phoneRaw}`}>{site.phone}</a></p>
+    </header>
+
+    <form class="planner-form" novalidate data-planner data-phone={site.phoneRaw} data-rise>
+      <ol class="steps" aria-hidden="true">
+        <li class="is-on">Формат</li><li>Даты и гости</li><li>Контакты</li>
+      </ol>
+      <div class="progress" aria-hidden="true"><span data-progress></span></div>
+
+      <fieldset data-step="0">
+        <legend class="display h-md">Что вам ближе?</legend>
+        <div class="chips" role="radiogroup" aria-label="Формат отдыха">
+          {kinds.map((k, i) => (
+            <button type="button" class="chip" role="radio" aria-checked={i === 3 ? 'true' : 'false'} data-kind={k}>{k}</button>
+          ))}
+        </div>
+        <p class="legend-2">Что добавить к поездке</p>
+        <div class="chips">
+          {extras.map((e) => <button type="button" class="chip" aria-pressed="false" data-extra={e}>{e}</button>)}
+        </div>
+      </fieldset>
+
+      <fieldset data-step="1" hidden>
+        <legend class="display h-md">Когда и сколько вас?</legend>
+        <div class="fields">
+          <label class="field">Заезд<input type="date" name="from" required /><span class="err" data-err="from"></span></label>
+          <label class="field">Выезд<input type="date" name="to" required /><span class="err" data-err="to"></span></label>
+          <label class="field">Гостей<input type="number" name="guests" min="1" max="60" value="2" inputmode="numeric" required /><span class="err" data-err="guests"></span></label>
+        </div>
+      </fieldset>
+
+      <fieldset data-step="2" hidden>
+        <legend class="display h-md">Как к вам обращаться?</legend>
+        <div class="fields">
+          <label class="field">Имя<input type="text" name="name" autocomplete="given-name" required /><span class="err" data-err="name"></span></label>
+          <label class="field wide">Пожелания (необязательно)<textarea name="note" rows="2"></textarea></label>
+        </div>
+        <p class="hint">Заявка откроется в WhatsApp с готовым текстом. Бронь подтверждает менеджер.</p>
+      </fieldset>
+
+      <div class="planner-nav">
+        <button type="button" class="btn btn-ghost" data-back hidden>Назад</button>
+        <button type="button" class="btn btn-primary" data-next>Дальше <span class="arrow" aria-hidden="true">→</span></button>
+        <button type="submit" class="btn btn-primary" data-send hidden>Отправить в WhatsApp <span class="arrow" aria-hidden="true">→</span></button>
+      </div>
+      <p class="done" role="status" aria-live="polite" data-done></p>
+    </form>
+  </div>
+</section>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('[data-planner]');
+  if (form) {
+    const steps = [...form.querySelectorAll<HTMLFieldSetElement>('[data-step]')];
+    const marks = [...form.querySelectorAll('.steps li')];
+    const bar = form.querySelector<HTMLElement>('[data-progress]')!;
+    const next = form.querySelector<HTMLButtonElement>('[data-next]')!;
+    const back = form.querySelector<HTMLButtonElement>('[data-back]')!;
+    const send = form.querySelector<HTMLButtonElement>('[data-send]')!;
+    const done = form.querySelector<HTMLElement>('[data-done]')!;
+    let i = 0;
+    let started = false;
+
+    const today = new Date().toISOString().slice(0, 10);
+    const from = form.elements.namedItem('from') as HTMLInputElement;
+    const to = form.elements.namedItem('to') as HTMLInputElement;
+    from.min = today; to.min = today;
+    from.addEventListener('change', () => { to.min = from.value || today; });
+
+    form.querySelectorAll<HTMLButtonElement>('[data-kind]').forEach((b) => b.addEventListener('click', () => {
+      form.querySelectorAll('[data-kind]').forEach((x) => x.setAttribute('aria-checked', 'false'));
+      b.setAttribute('aria-checked', 'true');
+      if (!started) { started = true; window.track('form_start', { form: 'planner' }); }
+    }));
+    form.querySelectorAll<HTMLButtonElement>('[data-extra]').forEach((b) => b.addEventListener('click', () => {
+      b.setAttribute('aria-pressed', b.getAttribute('aria-pressed') === 'true' ? 'false' : 'true');
+    }));
+
+    const setErr = (name: string, msg: string) => {
+      const el = form.querySelector(`[data-err="${name}"]`); if (el) el.textContent = msg;
+      const input = form.elements.namedItem(name) as HTMLInputElement | null;
+      if (input) input.setAttribute('aria-invalid', msg ? 'true' : 'false');
+      return !msg;
+    };
+    const validate = (step: number) => {
+      if (step === 1) {
+        const a = setErr('from', from.value ? '' : 'Укажите дату заезда');
+        const b = setErr('to', !to.value ? 'Укажите дату выезда' : to.value <= from.value ? 'Выезд должен быть позже заезда' : '');
+        const g = Number((form.elements.namedItem('guests') as HTMLInputElement).value);
+        const c = setErr('guests', g >= 1 && g <= 60 ? '' : 'От 1 до 60 гостей');
+        return a && b && c;
+      }
+      if (step === 2) {
+        const n = (form.elements.namedItem('name') as HTMLInputElement).value.trim();
+        return setErr('name', n.length >= 2 ? '' : 'Напишите, как к вам обращаться');
+      }
+      return true;
+    };
+    const show = (n: number) => {
+      i = n;
+      steps.forEach((s, k) => { s.hidden = k !== i; });
+      marks.forEach((m, k) => m.classList.toggle('is-on', k <= i));
+      bar.style.transform = `scaleX(${(i + 1) / steps.length})`;
+      back.hidden = i === 0; next.hidden = i === steps.length - 1; send.hidden = i !== steps.length - 1;
+      const first = steps[i].querySelector<HTMLElement>('input, button');
+      if (started) first?.focus({ preventScroll: true });
+    };
+    next.addEventListener('click', () => { started = true; if (validate(i)) show(i + 1); });
+    back.addEventListener('click', () => show(i - 1));
+    const fmt = (d: string) => d.split('-').reverse().join('.');
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (!validate(1)) return show(1);
+      if (!validate(2)) return;
+      const d = new FormData(form);
+      const kind = form.querySelector('[data-kind][aria-checked="true"]')?.getAttribute('data-kind');
+      const extras = [...form.querySelectorAll('[data-extra][aria-pressed="true"]')].map((x) => x.getAttribute('data-extra'));
+      const lines = [
+        `Здравствуйте! Меня зовут ${String(d.get('name')).trim()}.`,
+        `Формат: ${kind}`,
+        `Даты: ${fmt(String(d.get('from')))} – ${fmt(String(d.get('to')))}`,
+        `Гостей: ${d.get('guests')}`,
+        extras.length ? `Дополнительно: ${extras.join(', ')}` : '',
+        String(d.get('note') || '').trim() ? `Пожелания: ${String(d.get('note')).trim()}` : '',
+        'Заявка с сайта snowtime.ge',
+      ].filter(Boolean);
+      window.track('form_submit', { form: 'planner', kind });
+      const url = `https://wa.me/${form.dataset.phone}?text=${encodeURIComponent(lines.join('\n'))}`;
+      // Ссылка показывается всегда: в части браузеров автоматическое открытие окна запрещено.
+      done.innerHTML = '';
+      const msg = document.createElement('span');
+      msg.textContent = 'Заявка готова. Если WhatsApp не открылся сам, нажмите: ';
+      const a = document.createElement('a');
+      a.href = url; a.target = '_blank'; a.rel = 'noopener'; a.textContent = 'открыть WhatsApp';
+      done.append(msg, a);
+      try { window.open(url, '_blank', 'noopener'); } catch {}
+    });
+    show(0);
+  }
+</script>
+
+<style>
+  .planner-grid { display: grid; grid-template-columns: 1fr 1.15fr; gap: clamp(2rem, 6vw, 7rem); align-items: start; }
+  .planner header { display: flex; flex-direction: column; gap: 1.5rem; position: sticky; top: 7rem; }
+  .planner-phone a { font-weight: 700; color: var(--glacier); }
+  .planner-form { display: flex; flex-direction: column; gap: 1.75rem; padding: clamp(1.5rem, 3vw, 3rem); background: var(--ink-2); border: 1px solid var(--line-dark); border-radius: 1.25rem; }
+  .steps { display: flex; gap: 1.5rem; font-size: var(--step--1); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--stone-light); counter-reset: s; }
+  .steps li { counter-increment: s; opacity: 0.55; transition: opacity 0.3s, color 0.3s; }
+  .steps li::before { content: '0' counter(s) ' · '; }
+  .steps li.is-on { opacity: 1; color: var(--glacier); }
+  .progress { height: 2px; background: var(--line-dark); }
+  .progress span { display: block; height: 100%; background: var(--glacier); transform-origin: left; transform: scaleX(0.333); transition: transform 0.6s var(--ease); }
+  fieldset { border: 0; margin: 0; padding: 0; min-width: 0; display: flex; flex-direction: column; gap: 1.25rem; animation: stepIn 0.5s var(--ease); }
+  fieldset[hidden] { display: none; }
+  @keyframes stepIn { from { opacity: 0; transform: translateX(1.25rem); } }
+  legend { padding: 0; margin-bottom: 1.25rem; }
+  .legend-2 { font-size: var(--step--1); letter-spacing: 0.1em; text-transform: uppercase; color: var(--stone-light); margin-top: 0.5rem; }
+  .chips { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+  .fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: 1rem; }
+  .wide { grid-column: 1 / -1; }
+  .planner :global(.field input), .planner :global(.field textarea) { background: var(--ink); color: var(--snow); border-color: var(--line-dark); color-scheme: dark; }
+  .planner :global(.field .err) { color: #ffb4a8; }
+  .hint { font-size: var(--step--1); color: var(--stone-light); }
+  .planner-nav { display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: flex-end; }
+  .planner-nav [hidden] { display: none; }
+  .done { min-height: 1.5em; font-size: 0.9375rem; color: var(--snow); }
+  .done :global(a) { color: var(--glacier); font-weight: 700; }
+  @media (max-width: 900px) { .planner-grid { grid-template-columns: 1fr; } .planner header { position: static; } }
+</style>

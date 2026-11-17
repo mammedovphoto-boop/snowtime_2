@@ -1,0 +1,154 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import site from '../data/site.json';
+import tours from '../data/tours.json';
+import { wa } from '../data/helpers.js';
+import group from '../assets/group.jpg';
+import ereto from '../assets/ereto.jpg';
+import room from '../assets/ereto-room.jpg';
+import spa from '../assets/spa.jpg';
+---
+<Base title="Туры в Гудаури на 3 ночи — Snow Time" description="Туры в Гудаури на 3 ночи: трансфер из Тбилиси, отель Ereto, завтраки и ужины, трансфер к подъёмникам. Четыре заезда в сезоне 2026/27." current="tours">
+  <section class="page-hero dark" data-hero>
+    <div class="page-hero-media"><Image src={group} alt="Компания сноубордистов на вершине склона в Гудаури" widths={[768, 1280]} sizes="100vw" loading="eager" fetchpriority="high" data-hero-img /></div>
+    <div class="wrap page-hero-inner" data-hero-inner>
+      <p class="kicker" data-hero-rise>Туры · сезон {site.season}</p>
+      <h1 class="display h-xl" data-split>
+        <span class="split-line"><span>Три ночи</span></span>
+        <span class="split-line"><span>в <em>Гудаури</em></span></span>
+      </h1>
+      <p class="lead" data-hero-rise>Трансфер из Тбилиси, {tours.hotel}, завтраки, ужины и дорога к подъёмникам в одном туре.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <header class="sec-head">
+        <p class="kicker muted" data-rise>Заезды</p>
+        <h2 class="display h-lg" data-split><span class="split-line"><span>Выберите <em>даты</em></span></span></h2>
+      </header>
+      <ul class="tdates">
+        {tours.dates.map((d) => (
+          <li id={d.id} data-rise>
+            <div>
+              <p class="tnote muted">{d.note}</p>
+              <p class="display tlabel">{d.label}</p>
+            </div>
+            <p class="muted tmeta">{tours.nights} ночи · {tours.hotel}<br />{tours.priceStatus}</p>
+            <a class="btn btn-ink" href={wa(`Здравствуйте! Интересует тур в Гудаури на ${d.label}. Подскажите цену и свободные места.`)} data-track="tour_request">Узнать цену <span class="arrow" aria-hidden="true">→</span></a>
+          </li>
+        ))}
+      </ul>
+      <p class="muted other" data-rise>Нужны другие даты? <a class="link-line" href={wa('Здравствуйте! Хочу тур в Гудаури на свои даты.')}>Соберём тур под вас</a></p>
+    </div>
+  </section>
+
+  <section class="section snow">
+    <div class="wrap two">
+      <div>
+        <p class="kicker muted" data-rise>В туре</p>
+        <h2 class="display h-lg" data-split><span class="split-line"><span>Уже <em>включено</em></span></span></h2>
+        <ul class="inc">
+          {tours.included.map((x, i) => (
+            <li data-rise><span class="inc-n">0{i + 1}</span><div><h3>{x.title}</h3><p class="muted">{x.text}</p></div></li>
+          ))}
+        </ul>
+      </div>
+      <div class="two-media">
+        <div class="reveal-img tall"><Image src={ereto} alt="Отель Ereto by Snow Time в Гудаури" widths={[480, 800, 1200]} sizes="(max-width: 900px) 100vw, 40vw" /></div>
+        <div class="reveal-img small-img" data-parallax="0.12"><Image src={room} alt="Номер в отеле Ereto с окном на горы" widths={[320, 560]} sizes="(max-width: 900px) 50vw, 18vw" /></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" data-route>
+    <div class="wrap">
+      <header class="sec-head">
+        <p class="kicker muted" data-rise>Программа</p>
+        <h2 class="display h-lg" data-split><span class="split-line"><span>День <em>за днём</em></span></span></h2>
+      </header>
+      <ol class="days">
+        {tours.days.map((d) => (
+          <li data-rise>
+            <p class="day-n">{d.day}</p>
+            <h3 class="display h-md">{d.title}</h3>
+            <ul>{d.items.map((it) => <li>{it}</li>)}</ul>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <section class="section dark">
+    <div class="wrap two">
+      <div>
+        <p class="kicker" data-rise>Оплачивается отдельно</p>
+        <h2 class="display h-lg" data-split><span class="split-line"><span>По <em>желанию</em></span></span></h2>
+        <ul class="extra">
+          {tours.extra.map((x) => <li data-rise><h3>{x.title}</h3><p class="muted">{x.text}</p></li>)}
+        </ul>
+        <p class="muted fine" data-rise>Цены на ски-пассы, прокат и обучение — сезон {site.season}, в лари (GEL).</p>
+      </div>
+      <div class="reveal-img spa-img"><Image src={spa} alt="Private SPA в Гудаури" widths={[480, 800]} sizes="(max-width: 900px) 100vw, 40vw" /></div>
+    </div>
+  </section>
+
+  <section class="section snow cta">
+    <div class="wrap cta-in">
+      <h2 class="display h-lg" data-split><span class="split-line"><span>Забронировать <em>тур</em></span></span></h2>
+      <p class="lead muted" data-rise>Напишите менеджеру дату и количество человек. Ответим с ценой и свободными местами.</p>
+      <div class="cta-btns" data-rise>
+        <a class="btn btn-ink" href={wa('Здравствуйте! Хочу забронировать тур в Гудаури.')} data-track="whatsapp_click">WhatsApp <span class="arrow" aria-hidden="true">→</span></a>
+        <a class="btn btn-ghost" href={site.telegram}>Telegram</a>
+        <a class="btn btn-ghost" href={`tel:+${site.phoneRaw}`}>{site.phone}</a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .sec-head { display: flex; flex-direction: column; gap: 1.5rem; margin-bottom: clamp(2.5rem, 5vw, 5rem); }
+  .page-hero { position: relative; min-height: 82svh; display: flex; align-items: flex-end; overflow: hidden; }
+  .page-hero-media { position: absolute; inset: 0; }
+  .page-hero-media :global(img) { width: 100%; height: 100%; object-fit: cover; }
+  .page-hero-media::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(11,20,28,.5), rgba(11,20,28,.2) 40%, rgba(11,20,28,.9)); }
+  .page-hero-inner { position: relative; display: flex; flex-direction: column; gap: 1.5rem; padding-block: 8rem clamp(2.5rem, 5vw, 4.5rem); }
+  .page-hero h1 em { color: var(--glacier); }
+
+  .tdates { border-top: 1px solid var(--line-light); }
+  .tdates li { display: grid; grid-template-columns: 2fr 1.4fr auto; gap: 1.5rem; align-items: center; padding: clamp(1.25rem, 2.5vw, 2.25rem) 0; border-bottom: 1px solid var(--line-light); scroll-margin-top: 6rem; }
+  .tdates li:target { background: var(--snow); padding-inline: 1.25rem; }
+  .tnote { font-size: var(--step--1); letter-spacing: 0.12em; text-transform: uppercase; }
+  .tlabel { font-size: var(--step-3); line-height: 1; }
+  .tmeta { font-size: 0.9375rem; }
+  .other { margin-top: 2rem; }
+  @media (max-width: 800px) { .tdates li { grid-template-columns: 1fr; gap: 0.75rem; } }
+
+  .two { display: grid; grid-template-columns: 1.1fr 1fr; gap: clamp(2rem, 6vw, 7rem); align-items: center; }
+  .two h2 { margin-block: 1.5rem 2.5rem; }
+  .inc li { display: flex; gap: 1.5rem; padding: 1.25rem 0; border-top: 1px solid var(--line-light); }
+  .inc-n { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.14em; color: var(--stone); padding-top: 0.35rem; }
+  .inc h3, .extra h3 { font-size: var(--step-1); font-weight: 600; line-height: 1.25; }
+  .two-media { position: relative; padding-bottom: 14%; }
+  .tall { aspect-ratio: 4 / 5; }
+  .small-img { position: absolute; left: -10%; bottom: 0; width: 46%; aspect-ratio: 1; box-shadow: 0 0 0 0.6rem var(--snow); }
+  @media (max-width: 900px) { .two { grid-template-columns: 1fr; } .small-img { left: 0; } }
+
+  .days { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--line-light); border: 1px solid var(--line-light); }
+  .days > li { display: flex; flex-direction: column; gap: 1rem; padding: clamp(1.25rem, 2.5vw, 2.25rem); background: var(--paper); }
+  .day-n { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--glacier-deep); }
+  .days ul li { position: relative; padding: 0.45rem 0 0.45rem 1.25rem; font-size: 0.9375rem; }
+  .days ul li::before { content: ''; position: absolute; left: 0; top: 1.05em; width: 0.4rem; height: 1px; background: var(--ink); }
+  @media (max-width: 1000px) { .days { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 560px) { .days { grid-template-columns: 1fr; } }
+
+  .extra { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 2rem; }
+  .extra li { padding: 1.25rem 0; border-top: 1px solid var(--line-dark); }
+  .fine { font-size: var(--step--1); margin-top: 1.5rem; }
+  .spa-img { aspect-ratio: 4 / 3; }
+  @media (max-width: 560px) { .extra { grid-template-columns: 1fr; } }
+
+  .cta-in { display: flex; flex-direction: column; align-items: flex-start; gap: 1.75rem; }
+  .cta-btns { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+</style>

@@ -1,0 +1,141 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import site from '../data/site.json';
+import t from '../data/transfers.json';
+import { link } from '../data/helpers.js';
+import gudauri from '../assets/gudauri.jpg';
+---
+<Base title="Трансфер в Гудаури из Тбилиси и Кутаиси — Snow Time" description="Трансфер в Гудаури из аэропорта Тбилиси, Тбилиси и Кутаиси. Встреча с табличкой, ожидание при задержке рейса. От 100 $ за машину." current="transfers">
+  <section class="page-hero dark" data-hero>
+    <div class="page-hero-media"><Image src={gudauri} alt="Гудаури на закате" widths={[768, 1280, 1920]} sizes="100vw" loading="eager" fetchpriority="high" data-hero-img /></div>
+    <div class="wrap page-hero-inner" data-hero-inner>
+      <p class="kicker" data-hero-rise>Трансферы · сезон {site.season}</p>
+      <h1 class="display h-xl" data-split>
+        <span class="split-line"><span>Из аэропорта</span></span>
+        <span class="split-line"><span>прямо <em>к горам</em></span></span>
+      </h1>
+      <p class="lead" data-hero-rise>Встретим с табличкой и подождём, даже если рейс задержится. Цена за машину, а не за человека.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap calc-grid">
+      <div class="calc" data-calc data-phone={site.phoneRaw} data-routes={JSON.stringify(t.routes)} data-groups={JSON.stringify(t.groups)} data-rise>
+        <p class="kicker muted">Рассчитать трансфер</p>
+        <p class="calc-label" id="l-route">Маршрут</p>
+        <div class="chips" role="radiogroup" aria-labelledby="l-route">
+          {t.routes.map((r, i) => <button type="button" class="chip" role="radio" aria-checked={i === 0 ? 'true' : 'false'} data-route-id={i}>{r.from} → {r.to}</button>)}
+        </div>
+        <p class="calc-label" id="l-group">Сколько вас</p>
+        <div class="chips" role="radiogroup" aria-labelledby="l-group">
+          {t.groups.map((g, i) => <button type="button" class="chip" role="radio" aria-checked={i === 0 ? 'true' : 'false'} data-group-id={i}>{g}</button>)}
+        </div>
+        <p class="calc-label" id="l-class">Класс автомобиля</p>
+        <div class="chips" role="radiogroup" aria-labelledby="l-class">
+          <button type="button" class="chip" role="radio" aria-checked="true" data-class="std">Стандарт</button>
+          <button type="button" class="chip" role="radio" aria-checked="false" data-class="vip">VIP</button>
+        </div>
+        <div class="calc-out" aria-live="polite">
+          <p class="display calc-price" data-price>{t.routes[0].prices[0]} $</p>
+          <p class="muted" data-price-note>за машину, Стандарт</p>
+        </div>
+        <a class="btn btn-ink" href="#" data-order data-track="transfer_request">Заказать в WhatsApp <span class="arrow" aria-hidden="true">→</span></a>
+      </div>
+
+      <div>
+        <header class="sec-head">
+          <p class="kicker muted" data-rise>Цены</p>
+          <h2 class="display h-lg" data-split><span class="split-line"><span>Все <em>маршруты</em></span></span></h2>
+        </header>
+        <div class="table-wrap" data-rise>
+          <table>
+            <caption class="sr-only">Цены на трансфер Стандарт, в долларах за машину</caption>
+            <thead><tr><th scope="col">Маршрут</th>{t.groups.map((g) => <th scope="col">{g}</th>)}</tr></thead>
+            <tbody>
+              {t.routes.map((r) => <tr><th scope="row">{r.from} → {r.to}</th>{r.prices.map((p) => <td>{p} $</td>)}</tr>)}
+              <tr><th scope="row">VIP, премиальные автомобили</th>{t.groups.map(() => <td>{t.vipStatus}</td>)}</tr>
+            </tbody>
+          </table>
+        </div>
+        <ul class="perks">
+          {t.perks.map((p) => <li data-rise>{p}</li>)}
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="section snow">
+    <div class="wrap bundle">
+      <h2 class="display h-lg" data-split>
+        <span class="split-line"><span>В турах трансфер</span></span>
+        <span class="split-line"><span>уже <em>включён</em></span></span>
+      </h2>
+      <a class="btn btn-ink" href={link('tours')} data-rise>Смотреть туры <span class="arrow" aria-hidden="true">→</span></a>
+    </div>
+  </section>
+</Base>
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-calc]');
+  if (root) {
+    const routes = JSON.parse(root.dataset.routes!);
+    const groups = JSON.parse(root.dataset.groups!);
+    const state = { route: 0, group: 0, cls: 'std' };
+    const price = root.querySelector('[data-price]')!;
+    const note = root.querySelector('[data-price-note]')!;
+    const order = root.querySelector<HTMLAnchorElement>('[data-order]')!;
+    const render = () => {
+      const r = routes[state.route];
+      const vip = state.cls === 'vip';
+      const value = vip ? 'По запросу' : `${r.prices[state.group]} $`;
+      price.textContent = value;
+      note.textContent = vip ? 'цену на VIP подтвердит менеджер' : 'за машину, Стандарт';
+      const text = `Здравствуйте! Нужен трансфер ${r.from} → ${r.to}, ${groups[state.group]}, ${vip ? 'VIP' : 'Стандарт'}.\nДата и рейс: `;
+      order.href = `https://wa.me/${root.dataset.phone}?text=${encodeURIComponent(text)}`;
+      price.animate([{ opacity: 0, transform: 'translateY(0.4em)' }, { opacity: 1, transform: 'none' }], { duration: 350, easing: 'cubic-bezier(.22,1,.36,1)' });
+    };
+    const bind = (attr: string, key: 'route' | 'group' | 'cls', num = true) => {
+      const btns = [...root.querySelectorAll<HTMLButtonElement>(`[${attr}]`)];
+      btns.forEach((b) => b.addEventListener('click', () => {
+        btns.forEach((x) => x.setAttribute('aria-checked', 'false'));
+        b.setAttribute('aria-checked', 'true');
+        const v = b.getAttribute(attr)!;
+        (state as Record<string, unknown>)[key] = num ? Number(v) : v;
+        render();
+      }));
+    };
+    bind('data-route-id', 'route'); bind('data-group-id', 'group'); bind('data-class', 'cls', false);
+    render();
+  }
+</script>
+
+<style>
+  .sec-head { display: flex; flex-direction: column; gap: 1.5rem; margin-bottom: clamp(2rem, 4vw, 3.5rem); }
+  .page-hero { position: relative; min-height: 78svh; display: flex; align-items: flex-end; overflow: hidden; }
+  .page-hero-media { position: absolute; inset: 0; }
+  .page-hero-media :global(img) { width: 100%; height: 100%; object-fit: cover; }
+  .page-hero-media::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(11,20,28,.5), rgba(11,20,28,.2) 40%, rgba(11,20,28,.9)); }
+  .page-hero-inner { position: relative; display: flex; flex-direction: column; gap: 1.5rem; padding-block: 8rem clamp(2.5rem, 5vw, 4.5rem); }
+  .page-hero h1 em { color: var(--glacier); }
+
+  .calc-grid > * { min-width: 0; }
+  .calc-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: clamp(2rem, 6vw, 6rem); align-items: start; }
+  .calc { position: sticky; top: 6.5rem; display: flex; flex-direction: column; gap: 1rem; padding: clamp(1.5rem, 3vw, 2.75rem); background: var(--snow); border-radius: 1.25rem; }
+  .calc-label { font-size: var(--step--1); font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--stone); margin-top: 0.75rem; }
+  .chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .calc-out { margin-top: 1rem; padding-top: 1.5rem; border-top: 1px solid var(--line-light); }
+  .calc-price { font-size: var(--step-3); line-height: 1.05; font-variant-numeric: lining-nums; }
+  .calc .btn { align-self: flex-start; margin-top: 0.75rem; }
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; min-width: 34rem; border-collapse: collapse; font-size: 0.9375rem; }
+  th, td { padding: 1.1rem 1rem 1.1rem 0; text-align: left; border-bottom: 1px solid var(--line-light); }
+  thead th { font-size: var(--step--1); letter-spacing: 0.08em; text-transform: uppercase; color: var(--stone); font-weight: 700; }
+  tbody th { font-weight: 600; }
+  tbody td { font-weight: 700; font-variant-numeric: tabular-nums; }
+  .perks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 2rem; margin-top: 2.5rem; }
+  .perks li { position: relative; padding: 0.9rem 0 0.9rem 1.5rem; border-bottom: 1px solid var(--line-light); font-weight: 600; font-size: 0.9375rem; }
+  .perks li::before { content: ''; position: absolute; left: 0; top: 1.45em; width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--ember); }
+  .bundle { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 2rem; }
+  @media (max-width: 900px) { .calc-grid { grid-template-columns: 1fr; } .calc { position: static; } .perks { grid-template-columns: 1fr; } }
+</style>

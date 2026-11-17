@@ -1,0 +1,329 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import Planner from '../components/Planner.astro';
+import site from '../data/site.json';
+import stays from '../data/stays.json';
+import tours from '../data/tours.json';
+import transfers from '../data/transfers.json';
+import { link, wa } from '../data/helpers.js';
+
+import gudauri from '../assets/gudauri.jpg';
+import rider from '../assets/rider.jpg';
+import group from '../assets/group.jpg';
+import spa from '../assets/spa.jpg';
+import bar from '../assets/bar.jpg';
+import ereto from '../assets/ereto.jpg';
+import eretoRoom from '../assets/ereto-room.jpg';
+import cottage from '../assets/cottage.jpg';
+import chalet from '../assets/chalet.jpg';
+import chaletRoom from '../assets/chalet-room.jpg';
+import cottageRoom from '../assets/cottage-room.jpg';
+
+const img = { ereto, 'ereto-room': eretoRoom, cottage, chalet, 'chalet-room': chaletRoom, 'cottage-room': cottageRoom };
+const scenarios = [
+  { label: 'Номер в отеле', href: '#stay' },
+  { label: 'Коттедж целиком', href: '#stay' },
+  { label: 'Тур на 3 ночи', href: link('tours') },
+  { label: 'Поездка под ключ', href: '#plan' },
+];
+const minTransfer = transfers.routes[0].prices[0];
+---
+<Base
+  title="Snow Time — отдых в Гудаури: отель, коттеджи, туры и трансферы"
+  description="Snow Time организует отдых в Гудаури: отель Ereto, коттедж и шале целиком, туры на 3 ночи, трансферы из Тбилиси. Бронирование напрямую, без посредников."
+>
+  <!-- 1. Первый экран -->
+  <section class="hero dark" data-hero>
+    <div class="hero-media">
+      <Image src={gudauri} alt="Гудаури на закате: заснеженные склоны и отели курорта" widths={[768, 1280, 1920]} sizes="100vw" loading="eager" fetchpriority="high" data-hero-img />
+    </div>
+    <div class="wrap hero-inner" data-hero-inner>
+      <p class="kicker" data-hero-rise>Гудаури · Грузия · сезон {site.season}</p>
+      <h1 class="display h-xl" data-split>
+        <span class="split-line"><span>Горы, в которые</span></span>
+        <span class="split-line"><span>хочется <em>вернуться</em></span></span>
+      </h1>
+      <p class="lead hero-lead" data-hero-rise>Отель, коттеджи, туры и трансферы в Гудаури. Встретим в Тбилиси и организуем весь отдых: от дороги до ужина после катания.</p>
+      <div class="hero-actions" data-hero-rise>
+        <a class="btn btn-primary" href="#plan" data-track="cta_click">Подобрать отдых <span class="arrow" aria-hidden="true">→</span></a>
+        <a class="btn btn-ghost" href={link('tours')}>Туры на 3 ночи</a>
+      </div>
+      <ul class="hero-scenarios" aria-label="С чего начать" data-hero-rise>
+        {scenarios.map((s, i) => (
+          <li><a href={s.href}><span class="num">0{i + 1}</span>{s.label}</a></li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <!-- 2. Редакционное вступление -->
+  <section class="section intro snow">
+    <div class="wrap intro-grid">
+      <p class="kicker muted" data-rise>Snow Time</p>
+      <div>
+        <p class="display h-lg statement" data-words>Мы не просто сдаём номера. Мы собираем ваш отдых в горах целиком: дорогу, дом, ужин и склон.</p>
+        <ul class="stats">
+          <li data-rise><span class="display stat-num">2015</span><span class="muted">год, с которого мы живём и работаем в Гудаури</span></li>
+          <li data-rise><span class="display stat-num" data-count="3">3</span><span class="muted">своих объекта: отель, коттедж и шале</span></li>
+          <li data-rise><span class="display stat-num" data-count="18">18</span><span class="muted">номеров в отеле Ereto с видом на горы</span></li>
+          <li data-rise><span class="display stat-num" data-count="86">86</span><span class="muted">километров трасс на курорте</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. Проживание -->
+  <section class="section stay" id="stay">
+    <div class="wrap">
+      <header class="sec-head">
+        <p class="kicker muted" data-rise>Проживание</p>
+        <h2 class="display h-lg" data-split>
+          <span class="split-line"><span>Три дома</span></span>
+          <span class="split-line"><span>в <em>одном</em> курорте</span></span>
+        </h2>
+      </header>
+
+      {stays.map((s, i) => (
+        <article class:list={['stay-row', { flip: i % 2 === 1 }]}>
+          <div class="stay-media">
+            <div class="reveal-img stay-main"><Image src={img[s.image]} alt={`${s.name}: вид снаружи`} widths={[640, 960, 1400]} sizes="(max-width: 900px) 100vw, 55vw" /></div>
+            <div class="reveal-img stay-second" data-parallax="0.12"><Image src={img[s.image2]} alt={`${s.name}: интерьер`} widths={[400, 640]} sizes="(max-width: 900px) 45vw, 20vw" /></div>
+          </div>
+          <div class="stay-text">
+            <p class="stay-index display" aria-hidden="true">0{i + 1}</p>
+            <p class="kicker muted" data-rise>{s.kicker}</p>
+            <h3 class="display h-md" data-rise>{s.name}</h3>
+            <p class="muted" data-rise>{s.lead}</p>
+            <ul class="facts" data-rise>
+              {s.facts.map((f) => <li>{f}</li>)}
+            </ul>
+            <div class="stay-foot" data-rise>
+              <p><span class="display price">{s.priceLabel}</span><br /><span class="muted small">{s.priceNote}</span></p>
+              <a class="btn btn-ink" href={wa(`Здравствуйте! Интересует ${s.name}. Подскажите свободные даты и цену.`)} data-track="stay_request">Узнать даты <span class="arrow" aria-hidden="true">→</span></a>
+            </div>
+          </div>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <!-- 4. Туры -->
+  <section class="section tours dark" id="tours">
+    <div class="tours-bg" aria-hidden="true"><Image src={rider} alt="" widths={[768, 1280, 1920]} sizes="100vw" data-parallax="0.08" /></div>
+    <div class="wrap tours-inner">
+      <header class="sec-head">
+        <p class="kicker" data-rise>Туры · {tours.nights} ночи · {tours.hotel}</p>
+        <h2 class="display h-lg" data-split>
+          <span class="split-line"><span>Приезжайте</span></span>
+          <span class="split-line"><span><em>налегке</em></span></span>
+        </h2>
+        <p class="lead" data-rise>Трансфер из Тбилиси, отель, завтраки, ужины и дорога к подъёмникам уже собраны в один тур.</p>
+      </header>
+      <ul class="dates">
+        {tours.dates.map((d) => (
+          <li data-rise>
+            <a href={link('tours') + '#' + d.id}>
+              <span class="date-note">{d.note}</span>
+              <span class="display date-label">{d.label}</span>
+              <span class="date-go">Подробнее <span aria-hidden="true">→</span></span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <!-- 5. Маршрут -->
+  <section class="section route snow" data-route>
+    <div class="wrap">
+      <header class="sec-head">
+        <p class="kicker muted" data-rise>Как это будет</p>
+        <h2 class="display h-lg" data-split>
+          <span class="split-line"><span>Дорога уже</span></span>
+          <span class="split-line"><span>часть <em>отдыха</em></span></span>
+        </h2>
+      </header>
+      <div class="route-track">
+        <div class="route-line" aria-hidden="true"><span data-route-bar></span></div>
+        <ol class="route-stops">
+          {tours.route.map((r, i) => (
+            <li data-route-stop>
+              <span class="route-dot" aria-hidden="true"></span>
+              <span class="route-n">0{i + 1}</span>
+              <h3 class="display h-md">{r.place}</h3>
+              <p class="muted">{r.text}</p>
+            </li>
+          ))}
+        </ol>
+      </div>
+      <div class="reveal-img route-photo"><Image src={group} alt="Компания сноубордистов на склоне в Гудаури" widths={[768, 1280]} sizes="(max-width: 900px) 100vw, 80vw" /></div>
+    </div>
+  </section>
+
+  <!-- 6. Услуги -->
+  <section class="section services" id="services">
+    <div class="wrap">
+      <header class="sec-head">
+        <p class="kicker muted" data-rise>Организация отдыха</p>
+        <h2 class="display h-lg" data-split>
+          <span class="split-line"><span>Всё остальное</span></span>
+          <span class="split-line"><span>тоже <em>на нас</em></span></span>
+        </h2>
+      </header>
+      <div class="svc-grid">
+        <a class="svc svc-big" href={link('transfers')} data-rise>
+          <div>
+            <p class="kicker muted">Трансферы</p>
+            <h3 class="display h-md">Из аэропорта прямо к горам</h3>
+            <p class="muted">Встреча с табличкой и ожидание при задержке рейса. Цена за машину, а не за человека.</p>
+          </div>
+          <p class="svc-price"><span class="display price">от {minTransfer} $</span><span class="link-line">Цены и заказ <span aria-hidden="true">→</span></span></p>
+        </a>
+        <article class="svc svc-photo" data-rise>
+          <div class="reveal-img"><Image src={spa} alt="Private SPA в Гудаури: джакузи и зона отдыха" widths={[480, 800]} sizes="(max-width: 900px) 100vw, 33vw" /></div>
+          <p class="kicker muted">Private SPA</p>
+          <h3 class="display h-md">Сауна, хамам и джакузи</h3>
+          <p class="muted">Только для вашей компании, до 15 человек. От 300 GEL в час.</p>
+        </article>
+        <article class="svc" data-rise>
+          <p class="kicker muted">Прокат</p>
+          <h3 class="display h-md">Лыжи и сноуборды</h3>
+          <p class="muted">Комплект от 45 GEL в день, одежда и защита — отдельно.</p>
+        </article>
+        <article class="svc" data-rise>
+          <p class="kicker muted">Обучение</p>
+          <h3 class="display h-md">Инструкторы</h3>
+          <p class="muted">Занятия для новичков и продолжающих, от 260 GEL за 2 часа.</p>
+        </article>
+        <a class="svc svc-photo" href={site.bar} target="_blank" rel="noopener" data-rise>
+          <div class="reveal-img"><Image src={bar} alt="Snow Time Bar в отеле Ereto" widths={[480, 800]} sizes="(max-width: 900px) 100vw, 33vw" /></div>
+          <p class="kicker muted">Snow Time Bar</p>
+          <h3 class="display h-md">Грузинская кухня и вино</h3>
+          <p class="muted">Бар-ресторан в отеле Ereto, доставка по Гудаури.</p>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. Подбор отдыха -->
+  <Planner />
+
+  <!-- 8. О нас -->
+  <section class="section about snow" id="about">
+    <div class="wrap about-grid">
+      <div>
+        <p class="kicker muted" data-rise>О нас</p>
+        <h2 class="display h-lg" data-split>
+          <span class="split-line"><span>Приехали кататься.</span></span>
+          <span class="split-line"><span><em>Остались</em> жить</span></span>
+        </h2>
+      </div>
+      <div class="about-text">
+        <p data-rise>В 2009 году мы впервые встали на лыжи и начали собирать друзей в поездки. В 2013-м приехали с группой в Гудаури и влюбились в это место: высокие горы, фрирайд и одни из самых доступных ски-пассов в мире.</p>
+        <p data-rise>С 2015 года мы живём здесь и управляем отелем, коттеджем, шале и баром. Поэтому знаем курорт изнутри и отвечаем за ваш отдых сами.</p>
+        <p class="sign display" data-rise>Александр и Мария Бец,<br /><em>основатели Snow Time</em></p>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .sec-head { display: flex; flex-direction: column; gap: 1.5rem; margin-bottom: clamp(3rem, 6vw, 6rem); }
+  .small { font-size: var(--step--1); }
+  .price { font-size: var(--step-2); line-height: 1; }
+
+  /* Hero */
+  .hero { position: relative; min-height: 100svh; display: flex; align-items: flex-end; overflow: hidden; }
+  .hero-media { position: absolute; inset: 0; }
+  .hero-media :global(img) { width: 100%; height: 100%; object-fit: cover; will-change: transform; }
+  .hero-media::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(11, 20, 28, 0.55) 0%, rgba(11, 20, 28, 0.15) 35%, rgba(11, 20, 28, 0.88) 100%), linear-gradient(90deg, rgba(11, 20, 28, 0.55) 0%, rgba(11, 20, 28, 0) 60%); }
+  .hero-inner { position: relative; display: flex; flex-direction: column; gap: clamp(1.25rem, 2.5vw, 2rem); padding-block: 8rem clamp(2rem, 5vw, 4rem); }
+  .hero h1 em { color: var(--glacier); }
+  .hero-lead { max-width: 34ch; }
+  .hero-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+  .hero-scenarios { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: clamp(1rem, 3vw, 2.5rem); border-top: 1px solid var(--line-dark); }
+  .hero-scenarios a { display: flex; flex-direction: column; gap: 0.35rem; min-height: 4.5rem; padding: 1.1rem 1rem 0.5rem 0; font-weight: 600; text-decoration: none; transition: color 0.3s, padding 0.4s var(--ease); }
+  .hero-scenarios a:hover { color: var(--glacier); padding-left: 0.6rem; }
+  .hero-scenarios .num { font-size: 0.75rem; letter-spacing: 0.14em; color: var(--stone-light); }
+  @media (max-width: 760px) {
+    .hero-scenarios { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .hero-inner { padding-bottom: 6rem; }
+  }
+
+  /* Intro */
+  .intro-grid { display: grid; grid-template-columns: minmax(8rem, 1fr) 4fr; gap: 2rem; }
+  .statement { line-height: 1.02; max-width: 18ch; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); gap: 2rem; margin-top: clamp(3rem, 6vw, 6rem); padding-top: 2rem; border-top: 1px solid var(--line-light); }
+  .stats li { display: flex; flex-direction: column; gap: 0.5rem; font-size: var(--step--1); }
+  .stat-num { font-size: var(--step-3); font-variant-numeric: lining-nums tabular-nums; }
+  @media (max-width: 760px) { .intro-grid { grid-template-columns: 1fr; } }
+
+  /* Stay */
+  .stay-row { display: grid; grid-template-columns: 1.25fr 1fr; gap: clamp(2rem, 6vw, 7rem); align-items: center; margin-bottom: clamp(5rem, 10vw, 11rem); }
+  .stay-row:last-child { margin-bottom: 0; }
+  .stay-row.flip .stay-media { order: 2; }
+  .stay-media { position: relative; padding-bottom: 12%; }
+  .stay-main { aspect-ratio: 4 / 3; }
+  .stay-second { position: absolute; right: -6%; bottom: 0; width: 38%; aspect-ratio: 4 / 5; box-shadow: 0 0 0 0.6rem var(--paper); }
+  .stay-row.flip .stay-second { right: auto; left: -6%; }
+  .stay-text { position: relative; display: flex; flex-direction: column; gap: 1.25rem; }
+  .stay-index { font-size: var(--step-4); line-height: 0.8; color: var(--snow-2); position: absolute; right: 0; top: -0.6em; z-index: -1; }
+  .facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0; border-top: 1px solid var(--line-light); }
+  .facts li { padding: 0.85rem 0.75rem 0.85rem 0; border-bottom: 1px solid var(--line-light); font-size: 0.9375rem; font-weight: 600; }
+  .stay-foot { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 1.25rem; margin-top: 0.5rem; }
+  @media (max-width: 900px) {
+    .stay-row { grid-template-columns: 1fr; }
+    .stay-row.flip .stay-media { order: 0; }
+    .stay-second { right: 0; } .stay-row.flip .stay-second { left: 0; }
+  }
+
+  /* Tours */
+  .tours { position: relative; overflow: hidden; }
+  .tours-bg { position: absolute; inset: -10% 0; opacity: 0.38; }
+  .tours-bg :global(img) { width: 100%; height: 100%; object-fit: cover; }
+  .tours-bg::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, var(--ink) 15%, rgba(11, 20, 28, 0.3) 100%); }
+  .tours-inner { position: relative; }
+  .dates { border-top: 1px solid var(--line-dark); }
+  .dates a { display: grid; grid-template-columns: 1fr 2.2fr auto; align-items: center; gap: 1.5rem; padding: clamp(1.25rem, 2.5vw, 2.25rem) 0; border-bottom: 1px solid var(--line-dark); text-decoration: none; transition: padding 0.5s var(--ease), background 0.4s; }
+  .dates a:hover, .dates a:focus-visible { padding-inline: 1.25rem; background: rgba(159, 211, 238, 0.09); }
+  .date-note { font-size: var(--step--1); letter-spacing: 0.12em; text-transform: uppercase; color: var(--stone-light); }
+  .date-label { font-size: var(--step-3); line-height: 1; }
+  .date-go { font-weight: 600; color: var(--glacier); white-space: nowrap; }
+  @media (max-width: 760px) { .dates a { grid-template-columns: 1fr; gap: 0.5rem; } }
+
+  /* Route */
+  .route-track { position: relative; }
+  .route-line { position: absolute; left: 0; right: 0; top: 0.5rem; height: 1px; background: var(--line-light); }
+  .route-line span { display: block; height: 100%; background: var(--ink); transform-origin: left top; }
+  .route-stops { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2rem; }
+  .route-stops li { position: relative; display: flex; flex-direction: column; gap: 0.6rem; padding-top: 2.5rem; opacity: 0.35; transition: opacity 0.6s var(--ease); }
+  .route-stops li.is-on { opacity: 1; }
+  .route-dot { position: absolute; left: 0; top: 0; width: 1rem; height: 1rem; border-radius: 50%; border: 1px solid var(--ink); background: var(--snow); transition: background 0.5s, transform 0.5s var(--ease); }
+  .is-on .route-dot { background: var(--ember); border-color: var(--ember); transform: scale(1.2); }
+  .route-n { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.14em; color: var(--stone); }
+  .route-photo { margin-top: clamp(3rem, 7vw, 7rem); aspect-ratio: 21 / 9; }
+  @media (max-width: 760px) {
+    .route-stops { grid-template-columns: 1fr; gap: 0; }
+    .route-stops li { padding: 0 0 2.25rem 2.5rem; }
+    .route-line { left: 0.5rem; right: auto; top: 0; bottom: 0; width: 1px; height: auto; }
+    .route-line span { width: 100%; }
+    .route-photo { aspect-ratio: 4 / 3; }
+  }
+
+  /* Services */
+  .svc-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: var(--line-light); border: 1px solid var(--line-light); }
+  .svc { display: flex; flex-direction: column; gap: 1rem; padding: clamp(1.5rem, 3vw, 2.5rem); background: var(--paper); text-decoration: none; transition: background 0.4s; }
+  a.svc:hover { background: var(--snow); }
+  .svc-big { grid-column: span 2; justify-content: space-between; min-height: 20rem; background: var(--snow); }
+  .svc-big > div { display: flex; flex-direction: column; gap: 1rem; max-width: 30rem; }
+  .svc-price { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 1rem; }
+  .svc-photo .reveal-img { aspect-ratio: 3 / 2; margin-bottom: 0.5rem; }
+  @media (max-width: 900px) { .svc-grid { grid-template-columns: 1fr; } .svc-big { grid-column: auto; min-height: 0; } }
+
+  /* About */
+  .about-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: clamp(2rem, 6vw, 7rem); align-items: end; }
+  .about-text { display: flex; flex-direction: column; gap: 1.25rem; }
+  .sign { font-size: var(--step-1); line-height: 1.2; margin-top: 1rem; }
+  @media (max-width: 900px) { .about-grid { grid-template-columns: 1fr; } }
+</style>

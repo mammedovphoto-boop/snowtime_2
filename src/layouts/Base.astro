@@ -1,0 +1,172 @@
+---
+import '@fontsource-variable/manrope';
+import '@fontsource/cormorant/cyrillic-400.css';
+import '@fontsource/cormorant/cyrillic-400-italic.css';
+import '@fontsource/cormorant/cyrillic-500.css';
+import '@fontsource/cormorant/latin-400.css';
+import '@fontsource/cormorant/latin-400-italic.css';
+import '@fontsource/cormorant/latin-500.css';
+import '../styles/global.css';
+import fontDisplay from '@fontsource/cormorant/files/cormorant-cyrillic-500-normal.woff2?url';
+import fontItalic from '@fontsource/cormorant/files/cormorant-cyrillic-400-italic.woff2?url';
+import fontBody from '@fontsource-variable/manrope/files/manrope-cyrillic-wght-normal.woff2?url';
+import site from '../data/site.json';
+import { link, wa } from '../data/helpers.js';
+
+interface Props { title: string; description: string; current?: string; overHero?: boolean; }
+const { title, description, current = '', overHero = true } = Astro.props;
+
+const nav = [
+  { id: 'stay', label: 'Проживание', href: link('') + '#stay' },
+  { id: 'tours', label: 'Туры', href: link('tours') },
+  { id: 'transfers', label: 'Трансферы', href: link('transfers') },
+  { id: 'services', label: 'SPA и услуги', href: link('') + '#services' },
+  { id: 'about', label: 'О нас', href: link('') + '#about' },
+];
+---
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <link rel="preload" href={fontDisplay} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={fontItalic} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={fontBody} as="font" type="font/woff2" crossorigin />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta name="theme-color" content="#0b141c" />
+    <meta name="robots" content="noindex" />
+    <script is:inline>document.documentElement.classList.add('js');</script>
+    <script is:inline>
+      // Заготовка аналитики: события складываются в dataLayer, GTM подключается позже.
+      window.dataLayer = window.dataLayer || [];
+      window.track = function (event, params) { window.dataLayer.push(Object.assign({ event: event }, params || {})); };
+    </script>
+  </head>
+  <body>
+    <a class="skip" href="#main">Перейти к содержимому</a>
+
+    <header class:list={['site-header', { 'on-light': !overHero }]} data-header>
+      <div class="wrap bar">
+        <a class="logo" href={link('')}>
+          <span>Snow</span><span>Time</span><span class="sr-only"> — на главную</span>
+        </a>
+        <nav class="nav" aria-label="Основное меню" data-menu>
+          <ul>
+            {nav.map((n) => (
+              <li><a href={n.href} aria-current={current === n.id ? 'page' : undefined}>{n.label}</a></li>
+            ))}
+            <li><a href={site.bar} target="_blank" rel="noopener">Snow Time Bar</a></li>
+          </ul>
+          <a class="nav-phone" href={`tel:+${site.phoneRaw}`}>{site.phone}</a>
+        </nav>
+        <div class="bar-right">
+          <a class="phone" href={`tel:+${site.phoneRaw}`}>{site.phone}</a>
+          <span class="lang"><span class="sr-only">Язык: </span>RU</span>
+          <button class="menu-btn" type="button" aria-expanded="false" aria-label="Меню" data-menu-btn>
+            <span></span><span></span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main id="main"><slot /></main>
+
+    <footer class="site-footer dark">
+      <div class="wrap">
+        <p class="display foot-title">Ваш отдых в горах<br /><em>начинается здесь</em></p>
+        <div class="foot-grid">
+          <div>
+            <p class="foot-label">Менеджер по бронированию</p>
+            <a class="foot-phone" href={`tel:+${site.phoneRaw}`}>{site.phone}</a>
+            <div class="foot-links">
+              <a href={wa()} data-track="whatsapp_click">WhatsApp</a>
+              <a href={site.telegram}>Telegram</a>
+              <a href={`viber://chat?number=%2B${site.phoneRaw}`}>Viber</a>
+            </div>
+          </div>
+          <div>
+            <p class="foot-label">Контакты</p>
+            <p><a href={`mailto:${site.email}`}>{site.email}</a></p>
+            <p>{site.address}</p>
+          </div>
+          <div>
+            <p class="foot-label">Мы в соцсетях</p>
+            <p><a href={site.instagram}>Instagram</a></p>
+            <p><a href={site.facebook}>Facebook</a></p>
+          </div>
+        </div>
+        <p class="foot-note">© Snow Time, Гудаури. Демо-версия нового сайта: цены сезона {site.season} взяты с действующего сайта и подтверждаются перед запуском.</p>
+      </div>
+    </footer>
+
+    <div class="mobile-cta" role="region" aria-label="Быстрая связь">
+      <a class="btn btn-primary" href={link('') + '#plan'}>Подобрать отдых</a>
+      <a class="btn btn-ghost" href={wa()} data-track="whatsapp_click">WhatsApp</a>
+    </div>
+
+    <script>
+      import '../scripts/motion.js';
+      document.querySelectorAll('[data-track]').forEach((el) => {
+        el.addEventListener('click', () => window.track(el.dataset.track, { page: location.pathname }));
+      });
+    </script>
+  </body>
+</html>
+
+<style is:global>
+  .site-header { position: fixed; inset: 0 0 auto 0; z-index: 50; color: var(--snow); transition: transform 0.5s var(--ease), background 0.4s, color 0.4s; }
+  .site-header.on-light { color: var(--ink); }
+  .site-header.is-solid { background: rgba(11, 20, 28, 0.92); color: var(--snow); backdrop-filter: blur(10px); }
+  .site-header.is-hidden { transform: translateY(-100%); }
+  .site-header .bar { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; min-height: 4.75rem; }
+  .logo { display: flex; flex-direction: column; font-weight: 800; font-size: 0.95rem; line-height: 1; letter-spacing: 0.22em; text-transform: uppercase; text-decoration: none; }
+  .nav ul { display: flex; gap: clamp(1rem, 2vw, 2.25rem); }
+  .nav a { position: relative; display: inline-flex; align-items: center; min-height: 2.75rem; font-size: 0.875rem; font-weight: 600; text-decoration: none; }
+  .nav ul a::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0.55rem; height: 1px; background: currentColor; transform: scaleX(0); transform-origin: right; transition: transform 0.4s var(--ease); }
+  .nav ul a:hover::after, .nav ul a[aria-current='page']::after { transform: scaleX(1); transform-origin: left; }
+  .nav .nav-phone { display: none; }
+  .bar-right { display: flex; align-items: center; gap: 1.25rem; }
+  .phone { font-size: 0.9375rem; font-weight: 700; text-decoration: none; min-height: 2.75rem; display: inline-flex; align-items: center; }
+  .lang { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; padding: 0.3rem 0.55rem; border: 1px solid currentColor; border-radius: 999px; opacity: 0.8; }
+  .menu-btn { display: none; width: 2.75rem; height: 2.75rem; border: 0; background: none; cursor: pointer; position: relative; }
+  .menu-btn span { position: absolute; left: 0.6rem; right: 0.6rem; height: 2px; background: currentColor; transition: transform 0.35s var(--ease), top 0.35s var(--ease); }
+  .menu-btn span:first-child { top: 1.05rem; } .menu-btn span:last-child { top: 1.6rem; }
+  .menu-open .menu-btn span:first-child { top: 1.32rem; transform: rotate(45deg); }
+  .menu-open .menu-btn span:last-child { top: 1.32rem; transform: rotate(-45deg); }
+
+  @media (max-width: 1000px) {
+    .menu-btn { display: block; }
+    .phone { display: none; }
+    .nav { position: fixed; inset: 0; z-index: -1; display: flex; flex-direction: column; justify-content: center; gap: 2rem; padding: 6rem var(--gutter) 3rem; background: var(--ink); color: var(--snow); visibility: hidden; opacity: 0; transition: opacity 0.35s, visibility 0.35s; }
+    .menu-open .nav { visibility: visible; opacity: 1; }
+    .menu-open .site-header { color: var(--snow); }
+    .nav ul { flex-direction: column; gap: 0.25rem; }
+    .nav ul a { font-family: var(--font-display); font-size: 2.25rem; font-weight: 500; min-height: 3.25rem; }
+    .nav ul a::after { display: none; }
+    .nav .nav-phone { display: inline-flex; font-size: 1.25rem !important; font-weight: 700 !important; }
+  }
+
+  .site-footer { padding-block: clamp(4rem, 3rem + 5vw, 8rem) 7rem; }
+  .foot-title { font-size: var(--step-3); margin-bottom: clamp(3rem, 6vw, 5rem); }
+  .foot-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 2.5rem; padding-block: 2.5rem; border-block: 1px solid var(--line-dark); }
+  .foot-label { font-size: var(--step--1); letter-spacing: 0.14em; text-transform: uppercase; color: var(--stone-light); margin-bottom: 0.9rem; }
+  .foot-phone { display: inline-block; font-family: var(--font-display); font-size: var(--step-2); text-decoration: none; line-height: 1.1; }
+  .foot-links { display: flex; flex-wrap: wrap; gap: 1.25rem; margin-top: 1rem; }
+  .site-footer a { text-underline-offset: 0.25em; }
+  .site-footer p a, .foot-links a { display: inline-flex; align-items: center; min-height: 2.75rem; }
+  .foot-note { margin-top: 2rem; font-size: var(--step--1); color: var(--stone-light); max-width: 60ch; }
+
+  .mobile-cta { display: none; }
+  @media (max-width: 760px) {
+    .mobile-cta { position: fixed; inset: auto 0 0 0; z-index: 40; display: flex; gap: 0.5rem; padding: 0.6rem var(--gutter) calc(0.6rem + env(safe-area-inset-bottom)); background: rgba(11, 20, 28, 0.94); backdrop-filter: blur(10px); color: var(--snow); }
+    .mobile-cta .btn { flex: 1; min-height: 3rem; padding: 0 1rem; }
+    .mobile-cta .btn-ghost { flex: 0 0 auto; }
+    .mobile-cta .btn-ghost::before { background: var(--snow); }
+    .mobile-cta .btn-ghost:hover { color: var(--ink); }
+  }
+</style>

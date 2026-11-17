@@ -1,0 +1,63 @@
+# Админка Decap CMS. Статус: не подключена.
+# Чтобы вход заработал, нужно настроить авторизацию GitHub (OAuth-приложение
+# и небольшой обработчик на Cloudflare), затем указать base_url ниже.
+backend:
+  name: github
+  repo: mammedovphoto-boop/snowtime_2
+  branch: main
+  # base_url: https://<адрес-обработчика-авторизации>
+locale: ru
+media_folder: src/assets
+public_folder: ../assets
+collections:
+  - name: data
+    label: Данные сайта
+    files:
+      - name: site
+        label: Контакты
+        file: src/data/site.json
+        fields:
+          - { name: name, label: Название }
+          - { name: phone, label: Телефон менеджера }
+          - { name: phoneRaw, label: Телефон без знаков (для WhatsApp) }
+          - { name: email, label: Email }
+          - { name: address, label: Адрес }
+          - { name: telegram, label: Telegram }
+          - { name: instagram, label: Instagram }
+          - { name: facebook, label: Facebook }
+          - { name: bar, label: Сайт бара }
+          - { name: season, label: Сезон }
+      - name: tours
+        label: Туры
+        file: src/data/tours.json
+        fields:
+          - { name: nights, label: Ночей, widget: number }
+          - { name: hotel, label: Отель }
+          - { name: priceStatus, label: Подпись про цену }
+          - name: dates
+            label: Заезды
+            widget: list
+            fields:
+              - { name: id, label: Код }
+              - { name: label, label: Даты }
+              - { name: short, label: Коротко }
+              - { name: note, label: Подпись }
+          - { name: included, label: Включено, widget: list, fields: [{ name: title, label: Заголовок }, { name: text, label: Текст }] }
+          - { name: extra, label: Отдельно, widget: list, fields: [{ name: title, label: Заголовок }, { name: text, label: Текст }] }
+          - { name: route, label: Маршрут, widget: list, fields: [{ name: place, label: Место }, { name: text, label: Текст }] }
+          - { name: days, label: Программа, widget: list, fields: [{ name: day, label: День }, { name: title, label: Заголовок }, { name: items, label: Пункты, widget: list }] }
+      - name: transfers
+        label: Трансферы
+        file: src/data/transfers.json
+        fields:
+          - { name: groups, label: Размеры групп, widget: list }
+          - name: routes
+            label: Маршруты
+            widget: list
+            fields:
+              - { name: id, label: Код }
+              - { name: from, label: Откуда }
+              - { name: to, label: Куда }
+              - { name: prices, label: Цены по группам ($), widget: list, field: { name: price, label: Цена, widget: number } }
+          - { name: vipStatus, label: Подпись для VIP }
+          - { name: perks, label: Преимущества, widget: list }
